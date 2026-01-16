@@ -1,0 +1,22 @@
+{
+  "name": "Dev AI Quickstart",
+  "image": "mcr.microsoft.com/devcontainers/universal:linux",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "openai.chatgpt"
+      ]
+    }
+  },
+  "runArgs": [
+    "--env-file",
+    "${localEnv:HOME}/code/.env"
+  ],
+  "mounts": [
+    "source=${localEnv:HOME}/.codex,target=/home/codespace/.codex,type=bind",
+    "source=${localWorkspaceFolder}/.codex/sessions,target=/home/codespace/.codex/sessions,type=bind"
+  ]
+}

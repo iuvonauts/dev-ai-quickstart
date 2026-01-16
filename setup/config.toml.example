@@ -1,0 +1,54 @@
+# Default profile to use at startup (azure | chatgpt | custom)
+profile = "azure"
+# Require approvals for potentially risky actions (use "never" for quickstart)
+approval_policy = "never"
+
+# Notes:
+# - The Dev Container loads `~/code/.env` on your host as environment variables.
+# - This file references API keys via `env_key` (e.g. `AZURE_API_KEY`, `CUSTOM_API_KEY`).
+# - Endpoints and model names are stored directly in this file (and are set by `setup/setup.sh`).
+
+[projects."/workspaces"]
+# Trust the devcontainer workspace for tool access
+trust_level = "trusted"
+
+[mcp_servers.context7]
+# Docs lookup MCP server (library references)
+url = "https://mcp.context7.com/mcp"
+enabled = true
+
+[mcp_servers.semgrep]
+# Security scanning MCP server
+url = "https://mcp.semgrep.ai/mcp"
+enabled = true
+
+[profiles.azure]
+# Azure OpenAI profile (default)
+# This value is updated by the setup script.
+model = "gpt-5.2"
+model_provider = "azure"
+
+[model_providers.azure]
+# Azure OpenAI provider settings
+name = "Azure OpenAI"
+# This value is updated by the setup script.
+base_url = "https://<your-azure-openai-resource>.openai.azure.com/openai/v1"
+env_key = "AZURE_API_KEY"
+wire_api = "responses"
+
+[profiles.chatgpt]
+# OpenAI ChatGPT profile
+
+[profiles.custom]
+# Custom OpenAI-compatible endpoint profile (local or hosted)
+# This value is updated by the setup script.
+model = "<your-model>"
+model_provider = "custom"
+
+[model_providers.custom]
+# Custom OpenAI-compatible provider settings (local or hosted)
+name = "Custom OpenAI-compatible"
+# This value is updated by the setup script.
+base_url = "<your-openai-compatible-base-url>"
+env_key = "CUSTOM_API_KEY"
+wire_api = "responses"
