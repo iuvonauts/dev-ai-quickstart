@@ -1,6 +1,6 @@
 # Agent Working Notes
 
-_Last updated: 2025-12-18_
+_Last updated: 2026-01-31_
 
 This file is a lightweight index of the repo context, current priorities, and working
 agreements. Keep it short, update the date when material changes, and move details into the linked pages.
@@ -19,6 +19,7 @@ agreements. Keep it short, update the date when material changes, and move detai
 - Docker is available inside the devcontainer for running code/test environments.
 - The production codebase should live in `src/` as its own repo; this repo only
   provisions the development environment.
+- Use worktrees in the format of `<repo>/main`, `<repo>/branch` for organization. There are guardrails to prevent `checkout` and `switch`.
 - Codex session logs are written under `.codex/sessions/`. This template keeps
   the folder empty; commit sessions in your derived repo only if you want to
   preserve conversations.

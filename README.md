@@ -8,7 +8,7 @@ This repo creates a starting development environment for your project. Your actu
 - A pre-configured Docker-based Dev Container based on `mcr.microsoft.com/devcontainers/universal:linux`.
 - Docker access inside the Dev Container so the agent can spin up new environments to test code.
 - The OpenAI Codex coding extension (`openai.chatgpt`), configured via profiles to use Azure, ChatGPT sign-in, or a custom OpenAI-compatible endpoint.
-- A setup script to configure the initial environment.
+- A setup script (`setup.py`) to configure the initial environment.
 
 ## Before You Start (Important)
 This quickstart requires a folder named `code` in your home directory (Linux/WSL/macOS) where your repos will be stored.
@@ -45,25 +45,44 @@ In the steps below:
 4. Install Git:
    - Linux/WSL:
      ```bash
-     sudo apt update && sudo apt install -y git
+     sudo apt update \
+         && sudo apt install -y git \
+         && git config --global init.defaultBranch main
      ```
    - macOS: open Terminal, run `git --version`, and follow the prompt to install developer tools if asked.
 
 ### 3) Clone the Template
-In Linux/WSL/macOS, run:
+Use a git worktree layout: `~/code/$REPO/main` for `main`, plus sibling folders like `~/code/$REPO/<branch>`.
+
+1) Pick a repo name (used in the commands below):
 ```bash
-mkdir -p ~/code && git clone https://github.com/iuvonauts/dev-ai-quickstart.git ~/code/dev-ai-quickstart && cd ~/code/dev-ai-quickstart && git remote remove origin
+REPO="my-repo"
+```
+
+2) Make the parent folder and clone the template into `main`:
+```bash
+mkdir -p ~/code/"$REPO" \
+   && cd ~/code/"$REPO" \
+   && git clone https://github.com/iuvonauts/dev-ai-quickstart.git main
+```
+
+3) Detach from the template and start fresh git history:
+```bash
+cd ~/code/"$REPO"/main \
+  && git remote remove origin \
+  && rm -rf .git \
+  && git init
 ```
 
 ### 4) Run Setup Script
 From the repo folder in Linux/WSL/macOS, run:
 ```bash
-./setup/setup.sh
+python3 setup.py
 ```
-This script creates the default Codex extension configuration files (`~/code/.env` and `~/.codex/config.toml`), then prompts you for your preferred profile (Azure/ChatGPT/Custom) and any required values. It saves API keys into `~/code/.env` so the Dev Container can read them, and writes endpoints/models into `~/.codex/config.toml` for Codex to use. If you re-run the script later, leaving a prompt blank keeps your existing value.
+This script creates the default Codex extension configuration files (`~/code/.env` and `~/.codex/config.toml`) and prompts you for your preferred profile (Azure/ChatGPT/Custom) and any required values. It edits `~/.codex/config.toml` using simple line-based updates (no extra Python dependencies required).
 
 Included profiles:
-- **Azure**: Azure OpenAI endpoint + API key; requires `AZURE_API_KEY`. The setup script will also prompt you for the endpoint and model to write into `~/.codex/config.toml`. For iuvo, the endpoint and key are stored together in internal documentation/password manager.
+- **Azure**: Azure OpenAI endpoint + API key; requires `AZURE_API_KEY`. The setup script will also prompt you for the endpoint and model to write into `~/.codex/config.toml`. For iuvo, the endpoint and key are stored together in internal documentation/password manager as Azure coding agent API key.
 - **ChatGPT**: OpenAI sign-in; you will be prompted to log in when you first use Codex in VS Code.
 - **Custom**: Any OpenAI-compatible endpoint (local or hosted). The setup script will prompt you for `CUSTOM_ENDPOINT` and `CUSTOM_MODEL`, and (optionally) `CUSTOM_API_KEY` (enter any text if your service does not require a key). Example local endpoint: `http://host.docker.internal:8080/v1`.
 
@@ -89,12 +108,12 @@ This repo mounts `~/.codex` into the container so your configuration is reused a
 ## Agent Skills & Tools
 Most coding agents support Agent Skills (https://agentskills.io/). Agent Skills ensure agents apply consistent instructions for specific tasks. Skills are stored in `.codex/skills/<skill-name>/`. The skills `$skill-creator` and `$skill-installer` are included by default with the Codex extension. To add additional skills, you can browse OpenAI's curated skills catalog at https://github.com/openai/skills, find other skills created by the community, or create your own skills for specific tasks.
 
-This quickstart also includes two MCP tools in `~/.codex/config.toml` (created from `setup/config.toml.example`): 
+This quickstart also includes two MCP tools in `~/.codex/config.toml` (created from `.setup/config.toml.example`):
 - `context7`: Pulls up-to-date library documentation and code examples. The agent will use this tool when answering API/library questions to avoid outdated information.
 - `semgrep`: Runs static security scanning on code and returns actionable findings. Ask the agent to use this tool for security reviews and before publishing.
 
 ## Configure Codex Profiles (Azure / ChatGPT / Custom)
-Codex reads a config file at `~/.codex/config.toml` on your host. This file lives outside the repo. It is mounted into the container so your settings follow you. The setup script copies `setup/config.toml.example` into `~/.codex/config.toml` if it does not exist. API keys are stored in `~/code/.env`, and the setup script writes the relevant endpoint/model into `~/.codex/config.toml`. Edit `~/.codex/config.toml` to switch profiles or change settings.
+Codex reads a config file at `~/.codex/config.toml` on your host. This file lives outside the repo. It is mounted into the container so your settings follow you. The setup script copies `.setup/config.toml.example` into `~/.codex/config.toml` if it does not exist. API keys are stored in `~/code/.env`, and the setup script writes the relevant endpoint/model into `~/.codex/config.toml`. Edit `~/.codex/config.toml` to switch profiles or change settings.
 
 ## Troubleshooting
 - Dev Container fails with an env-file error: make sure `~/code/.env` exists on your host (Linux/WSL).
@@ -118,12 +137,13 @@ Codex reads a config file at `~/.codex/config.toml` on your host. This file live
 │  ├─ sessions/               # Agent chat sessions logs
 │  └─ skills/                 # Agent skills
 ├─ .devcontainer/
-│  └─ devcontainer.json       # Dev Container definition
+│  ├─ devcontainer.json       # Dev Container definition
+│  └─ worktree-guard.sh       # Optional guard against branch switching
 ├─ .vscode/
 │  └─ settings.json           # VS Code settings
-├─ setup/
-│  ├─ setup.sh                # Writes ~/code/.env and ~/.codex/config.toml (prompts for keys/profile)
+├─ .setup/
 │  ├─ .env.example            # Example env vars (copied to ~/code/.env by setup script)
 │  └─ config.toml.example     # Example Codex config (copied to ~/.codex/config.toml by setup script)
+├─ setup.py                   # Writes ~/code/.env and ~/.codex/config.toml (prompts for keys/profile)
 └─ src/                       # Your production repo
 ```

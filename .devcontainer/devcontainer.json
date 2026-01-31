@@ -1,5 +1,5 @@
 {
-  "name": "Dev AI Quickstart",
+  "name": "${localWorkspaceFolderBasename}",
   "image": "mcr.microsoft.com/devcontainers/universal:linux",
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
@@ -18,5 +18,6 @@
   "mounts": [
     "source=${localEnv:HOME}/.codex,target=/home/codespace/.codex,type=bind",
     "source=${localWorkspaceFolder}/.codex/sessions,target=/home/codespace/.codex/sessions,type=bind"
-  ]
+  ],
+  "postCreateCommand": "bash .devcontainer/worktree-guard.sh"
 }

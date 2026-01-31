@@ -17,3 +17,9 @@
 ## Codex Configuration
 - Host config mounted into `/home/codespace/.codex`.
 - Session logs mounted from `.codex/sessions` in the repo.
+
+## Setup Script
+- Run `python3 setup.py` from the repo to create/update `~/code/.env` and `~/.codex/config.toml`.
+
+## Worktree Guard
+- `.devcontainer/worktree-guard.sh` can install a guard that blocks `git switch` / `git checkout` in this repo.
