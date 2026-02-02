@@ -86,7 +86,7 @@ Included profiles:
 - **ChatGPT**: OpenAI sign-in; you will be prompted to log in when you first use Codex in VS Code.
 - **Custom**: Any OpenAI-compatible endpoint (local or hosted). The setup script will prompt you for `CUSTOM_ENDPOINT` and `CUSTOM_MODEL`, and (optionally) `CUSTOM_API_KEY` (enter any text if your service does not require a key). Example local endpoint: `http://host.docker.internal:8080/v1`.
 
-You will also be prompted for an optional `GITHUB_PAT` (GitHub Personal Access Token) to work with GitHub from the Dev Container (for example: cloning private repos, pushing code, or using GitHub APIs). This can be created at https://github.com/settings/tokens.
+You will also be prompted for an optional `GH_TOKEN` (GitHub Personal Access Token) to work with GitHub from the Dev Container (for example: cloning private repos, pushing code, or using GitHub APIs). This can be created at https://github.com/settings/tokens.
 
 **Treat all keys like passwords! Do not commit them or share them in chat!**
 

@@ -243,9 +243,9 @@ def main():
     cfg_target.write_text("\n".join(toml_lines) + "\n", encoding="utf-8")
 
     print("\n--- GitHub Access ---")
-    cur_pat = get_env_value(env_target, "GITHUB_PAT")
+    cur_pat = get_env_value(env_target, "GH_TOKEN")
     pat = ask("GitHub PAT (optional)", cur_pat, secret=True)
-    update_env(env_target, "GITHUB_PAT", pat)
+    update_env(env_target, "GH_TOKEN", pat)
 
     print("\n✅ Setup complete. Run `code .` and select 'Reopen in Container'.")
 
