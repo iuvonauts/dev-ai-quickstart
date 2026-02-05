@@ -1,254 +1,149 @@
 #!/usr/bin/env python3
 import sys
-from pathlib import Path
 from getpass import getpass
+from pathlib import Path
 
-# --- Helpers ---
-
-def get_env_value(path: Path, key: str):
-    """Reads a specific key from a .env file without regex."""
-    if not path.exists():
-        return None
-    lines = path.read_text(encoding="utf-8").splitlines()
-    for line in lines:
-        if line.strip().startswith(f"{key}="):
-            parts = line.split("=", 1)
-            if len(parts) > 1:
-                return parts[1].strip()
-    return None
+DEFAULT_AZURE_BASE_URL = "https://<your-azure-openai-resource>.openai.azure.com/openai/v1"
+DEFAULT_AZURE_MODEL = "gpt-5.2"
+DEFAULT_CUSTOM_BASE_URL = "<your-openai-compatible-base-url>"
+DEFAULT_CUSTOM_MODEL = "<your-model>"
 
 
-def ask(prompt, default=None, secret=False):
-    """Helper for interactive prompts. Secrets with defaults show [set]."""
-    display_default = default
-    if secret and default:
-        display_default = "set"
-
+def ask(prompt: str, default: str | None = None, *, secret: bool = False) -> str | None:
+    display_default = "set" if (secret and default) else default
     label = f"{prompt} [{display_default}]" if display_default else prompt
     val = getpass(f"{label}: ") if secret else input(f"{label}: ")
+    out = val.strip()
+    return out if out else default
 
-    # If user just hits enter, return the original default (the real key)
-    return val.strip() or default
+
+def toml_quote(value: str) -> str:
+    # Minimal quoting for TOML basic strings.
+    value = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f"\"{value}\""
 
 
-def update_env(path: Path, key: str, value: str):
-    """Updates or appends a KEY=VALUE pair in .env without regex."""
-    if not value:
-        return
-    if not path.exists():
-        path.touch()
+def toml_set_existing(lines: list[str], section: str | None, key: str, value: str) -> bool:
+    """Set a TOML key that already exists in the template (no add/merge logic)."""
+    wanted = f"{key} = {toml_quote(value)}"
+    current_section: str | None = None
+    for i, raw in enumerate(lines):
+        stripped = raw.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            current_section = stripped[1:-1].strip()
+            continue
 
-    lines = path.read_text(encoding="utf-8").splitlines()
-    new_lines = []
-    found = False
-
-    for line in lines:
-        if line.strip().startswith(f"{key}="):
-            new_lines.append(f"{key}={value}")
-            found = True
+        if section is None:
+            if current_section is not None:
+                continue
         else:
-            new_lines.append(line)
-
-    if not found:
-        new_lines.append(f"{key}={value}")
-
-    path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
-
-
-def _strip_toml_comment(value: str) -> str:
-    in_quotes = False
-    escaped = False
-    out = []
-    for ch in value:
-        if escaped:
-            out.append(ch)
-            escaped = False
-            continue
-        if ch == "\\" and in_quotes:
-            out.append(ch)
-            escaped = True
-            continue
-        if ch == "\"":
-            in_quotes = not in_quotes
-            out.append(ch)
-            continue
-        if ch == "#" and not in_quotes:
-            break
-        out.append(ch)
-    return "".join(out).strip()
-
-
-def _toml_unquote(value: str) -> str:
-    value = value.strip()
-    if len(value) >= 2 and value[0] == "\"" and value[-1] == "\"":
-        return value[1:-1]
-    return value
-
-
-def toml_get(lines: list[str], section: str | None, key: str) -> str | None:
-    current_section = None
-    for raw in lines:
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        if line.startswith("[") and line.endswith("]"):
-            current_section = line[1:-1].strip()
-            continue
-        if section is not None and current_section != section:
-            continue
-        if section is None and current_section is not None:
-            continue
-        if "=" not in line:
-            continue
-        left, right = line.split("=", 1)
-        if left.strip() != key:
-            continue
-        return _toml_unquote(_strip_toml_comment(right))
-    return None
-
-
-def toml_set(lines: list[str], section: str | None, key: str, value: str) -> list[str]:
-    if value is None or value == "":
-        return lines
-
-    desired_line = f'{key} = "{value}"'
-    out: list[str] = []
-    current_section = None
-    section_found = section is None
-    key_written = False
-
-    def flush_missing_section():
-        nonlocal section_found, key_written
-        if section_found or section is None:
-            return
-        if out and out[-1].strip() != "":
-            out.append("")
-        out.append(f"[{section}]")
-        out.append(desired_line)
-        section_found = True
-        key_written = True
-
-    for raw in lines:
-        line = raw.strip()
-        is_header = line.startswith("[") and line.endswith("]")
-        if is_header:
-            header_name = line[1:-1].strip()
-            if section is not None and current_section == section and not key_written:
-                out.append(desired_line)
-                key_written = True
-            if section is not None and not section_found and header_name != section:
-                # Still haven't seen the desired section; keep going.
-                pass
-            current_section = header_name
-            if section is not None and current_section == section:
-                section_found = True
-            out.append(raw)
-            continue
-
-        in_target_section = (section is None and current_section is None) or (section is not None and current_section == section)
-        if in_target_section and not line.startswith("#") and "=" in line:
-            left, _right = line.split("=", 1)
-            if left.strip() == key:
-                out.append(desired_line)
-                key_written = True
+            if current_section != section:
                 continue
 
-        out.append(raw)
-
-    if section is not None and not section_found:
-        flush_missing_section()
-    elif section is not None and section_found and not key_written:
-        if out and out[-1].strip() != "":
-            out.append("")
-        out.append(desired_line)
-    elif section is None and not key_written:
-        # Insert near the top (after initial comments/blank lines).
-        insert_at = 0
-        for i, raw in enumerate(out):
-            stripped = raw.strip()
-            if stripped and not stripped.startswith("#"):
-                insert_at = i
-                break
-            insert_at = i + 1
-        out.insert(insert_at, desired_line)
-
-    return out
+        if stripped.startswith(f"{key} ="):
+            indent = raw[: len(raw) - len(raw.lstrip(" "))]
+            lines[i] = indent + wanted
+            return True
+    return False
 
 
-# --- Main Flow ---
+def write_devcontainer_env(path: Path, template_path: Path, *, azure_key: str, custom_key: str):
+    lines = template_path.read_text(encoding="utf-8").splitlines()
+    out: list[str] = []
+    for line in lines:
+        if line.startswith("AZURE_API_KEY="):
+            out.append(f"AZURE_API_KEY={azure_key}")
+        elif line.startswith("CUSTOM_API_KEY="):
+            out.append(f"CUSTOM_API_KEY={custom_key}")
+        else:
+            out.append(line)
+    path.write_text("\n".join(out) + "\n", encoding="utf-8")
 
-def main():
+
+def main() -> int:
     repo_root = Path(__file__).parent.resolve()
     home = Path.home()
     code_dir = home / "code"
     codex_dir = home / ".codex"
 
+    env_target = code_dir / "devcontainer.env"
+    netrc_target = code_dir / "devcontainer.netrc"
+    cfg_target = codex_dir / "config.toml"
+
+    existing = [p for p in (env_target, netrc_target, cfg_target) if p.exists()]
+    if existing:
+        print("❌ Refusing to overwrite existing files:")
+        for p in existing:
+            print(f"  - {p}")
+        print("\nDelete them if you want to re-run setup.")
+        return 1
+
     code_dir.mkdir(exist_ok=True)
     codex_dir.mkdir(exist_ok=True)
 
-    env_target = code_dir / ".env"
-    cfg_target = codex_dir / "config.toml"
-
-    # Deploy templates
-    if not env_target.exists():
-        env_target.write_text((repo_root / ".setup/.env.example").read_text())
-        print(f"Created {env_target}")
-
-    if not cfg_target.exists():
-        cfg_target.write_text((repo_root / ".setup/config.toml.example").read_text())
-        print(f"Created {cfg_target}")
-
-    toml_lines = cfg_target.read_text(encoding="utf-8").splitlines()
-
     print("\n--- Codex Configuration ---")
-    print("Press Enter to keep existing values.")
-
-    cur_profile = toml_get(toml_lines, None, "profile") or "azure"
-    profile = ask("Select Profile (azure/chatgpt/custom)", cur_profile).lower()
+    profile = (ask("Select Profile (azure/chatgpt/custom)", "azure") or "azure").lower()
     if profile not in {"azure", "chatgpt", "custom"}:
         print("❌ Invalid profile. Use azure, chatgpt, or custom.")
-        sys.exit(1)
-    toml_lines = toml_set(toml_lines, None, "profile", profile)
+        return 1
+
+    azure_base_url = DEFAULT_AZURE_BASE_URL
+    azure_model = DEFAULT_AZURE_MODEL
+    custom_base_url = DEFAULT_CUSTOM_BASE_URL
+    custom_model = DEFAULT_CUSTOM_MODEL
+
+    azure_key = ""
+    custom_key = ""
 
     if profile == "azure":
-        cur_url = toml_get(toml_lines, "model_providers.azure", "base_url")
-        url = ask("Azure Endpoint", cur_url)
-        if url:
-            toml_lines = toml_set(toml_lines, "model_providers.azure", "base_url", url)
-
-        cur_model = toml_get(toml_lines, "profiles.azure", "model")
-        model = ask("Azure Deployment/Model Name", cur_model)
-        if model:
-            toml_lines = toml_set(toml_lines, "profiles.azure", "model", model)
-
-        cur_key = get_env_value(env_target, "AZURE_API_KEY")
-        key = ask("Azure API Key", cur_key, secret=True)
-        update_env(env_target, "AZURE_API_KEY", key)
-
+        azure_base_url = ask("Azure Endpoint", DEFAULT_AZURE_BASE_URL) or DEFAULT_AZURE_BASE_URL
+        azure_model = ask("Azure Deployment/Model Name", DEFAULT_AZURE_MODEL) or DEFAULT_AZURE_MODEL
+        azure_key = ask("Azure API Key", None, secret=True) or ""
     elif profile == "custom":
-        cur_url = toml_get(toml_lines, "model_providers.custom", "base_url")
-        url = ask("Custom Endpoint", cur_url)
-        if url:
-            toml_lines = toml_set(toml_lines, "model_providers.custom", "base_url", url)
-
-        cur_model = toml_get(toml_lines, "profiles.custom", "model")
-        model = ask("Custom Model Name", cur_model)
-        if model:
-            toml_lines = toml_set(toml_lines, "profiles.custom", "model", model)
-
-        cur_key = get_env_value(env_target, "CUSTOM_API_KEY")
-        key = ask("Custom API Key (optional)", cur_key, secret=True)
-        update_env(env_target, "CUSTOM_API_KEY", key)
-
-    cfg_target.write_text("\n".join(toml_lines) + "\n", encoding="utf-8")
+        custom_base_url = ask("Custom Endpoint", DEFAULT_CUSTOM_BASE_URL) or DEFAULT_CUSTOM_BASE_URL
+        custom_model = ask("Custom Model Name", DEFAULT_CUSTOM_MODEL) or DEFAULT_CUSTOM_MODEL
+        custom_key = ask("Custom API Key (optional)", None, secret=True) or ""
 
     print("\n--- GitHub Access ---")
-    cur_pat = get_env_value(env_target, "GH_TOKEN")
-    pat = ask("GitHub PAT (optional)", cur_pat, secret=True)
-    update_env(env_target, "GH_TOKEN", pat)
+    pat = ask("GitHub PAT (optional)", None, secret=True)
+
+    # 1) devcontainer.env
+    write_devcontainer_env(
+        env_target,
+        repo_root / ".setup/devcontainer.env.example",
+        azure_key=azure_key,
+        custom_key=custom_key,
+    )
+    print(f"Created {env_target}")
+
+    # 2) devcontainer.netrc
+    netrc_lines = ["machine github.com", "  login x-access-token"]
+    if pat:
+        netrc_lines.append(f"  password {pat}")
+    netrc_target.write_text("\n".join(netrc_lines) + "\n", encoding="utf-8")
+    try:
+        netrc_target.chmod(0o600)
+    except OSError:
+        pass
+    print(f"Created {netrc_target}")
+
+    # 3) ~/.codex/config.toml
+    cfg_lines = (repo_root / ".setup/config.toml.example").read_text(encoding="utf-8").splitlines()
+    ok = True
+    ok &= toml_set_existing(cfg_lines, None, "profile", profile)
+    ok &= toml_set_existing(cfg_lines, "profiles.azure", "model", azure_model)
+    ok &= toml_set_existing(cfg_lines, "model_providers.azure", "base_url", azure_base_url)
+    ok &= toml_set_existing(cfg_lines, "profiles.custom", "model", custom_model)
+    ok &= toml_set_existing(cfg_lines, "model_providers.custom", "base_url", custom_base_url)
+    if not ok:
+        print("❌ Failed to update .setup/config.toml.example (missing expected keys/sections).")
+        return 1
+    cfg_target.write_text("\n".join(cfg_lines) + "\n", encoding="utf-8")
+    print(f"Created {cfg_target}")
 
     print("\n✅ Setup complete. Run `code .` and select 'Reopen in Container'.")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

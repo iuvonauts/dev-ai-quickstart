@@ -79,14 +79,15 @@ From the repo folder in Linux/WSL/macOS, run:
 ```bash
 python3 setup.py
 ```
-This script creates the default Codex extension configuration files (`~/code/.env` and `~/.codex/config.toml`) and prompts you for your preferred profile (Azure/ChatGPT/Custom) and any required values. It edits `~/.codex/config.toml` using simple line-based updates (no extra Python dependencies required).
+This script creates the default Codex extension configuration files (`~/code/devcontainer.env`, `~/code/devcontainer.netrc`, and `~/.codex/config.toml`) and prompts you for your preferred profile (Azure/ChatGPT/Custom) and any required values. It writes `~/.codex/config.toml` from `.setup/config.toml.example` and fills in the profile/endpoint/model values.
+It refuses to overwrite existing files; delete them if you want to re-run setup.
 
 Included profiles:
 - **Azure**: Azure OpenAI endpoint + API key; requires `AZURE_API_KEY`. The setup script will also prompt you for the endpoint and model to write into `~/.codex/config.toml`. For iuvo, the endpoint and key are stored together in internal documentation/password manager as Azure coding agent API key.
 - **ChatGPT**: OpenAI sign-in; you will be prompted to log in when you first use Codex in VS Code.
-- **Custom**: Any OpenAI-compatible endpoint (local or hosted). The setup script will prompt you for `CUSTOM_ENDPOINT` and `CUSTOM_MODEL`, and (optionally) `CUSTOM_API_KEY` (enter any text if your service does not require a key). Example local endpoint: `http://host.docker.internal:8080/v1`.
+- **Custom**: Any OpenAI-compatible endpoint (local or hosted). The setup script will prompt you for the endpoint and model to write into `~/.codex/config.toml`, and (optionally) `CUSTOM_API_KEY`. Example local endpoint: `http://host.docker.internal:8080/v1`.
 
-You will also be prompted for an optional `GH_TOKEN` (GitHub Personal Access Token) to work with GitHub from the Dev Container (for example: cloning private repos, pushing code, or using GitHub APIs). This can be created at https://github.com/settings/tokens.
+You will also be prompted for an optional GitHub Personal Access Token to store in `~/code/devcontainer.netrc` for GitHub access inside the Dev Container (for example: cloning private repos, pushing code, or using GitHub APIs). This can be created at https://github.com/settings/tokens.
 
 **Treat all keys like passwords! Do not commit them or share them in chat!**
 
@@ -102,7 +103,8 @@ You will also be prompted for an optional `GH_TOKEN` (GitHub Personal Access Tok
 
 3. Wait for the container to build (first time can take several minutes).
 
-This repo mounts `~/.codex` into the container so your configuration is reused across machines:
+This repo mounts host config into the container so your configuration is reused across machines:
+- `~/code/devcontainer.netrc` -> `/home/codespace/.netrc`
 - `~/.codex` -> `/home/codespace/.codex`
 
 ## Agent Skills & Tools
@@ -113,10 +115,10 @@ This quickstart also includes two MCP tools in `~/.codex/config.toml` (created f
 - `semgrep`: Runs static security scanning on code and returns actionable findings. Ask the agent to use this tool for security reviews and before publishing.
 
 ## Configure Codex Profiles (Azure / ChatGPT / Custom)
-Codex reads a config file at `~/.codex/config.toml` on your host. This file lives outside the repo. It is mounted into the container so your settings follow you. The setup script copies `.setup/config.toml.example` into `~/.codex/config.toml` if it does not exist. API keys are stored in `~/code/.env`, and the setup script writes the relevant endpoint/model into `~/.codex/config.toml`. Edit `~/.codex/config.toml` to switch profiles or change settings.
+Codex reads a config file at `~/.codex/config.toml` on your host. This file lives outside the repo. It is mounted into the container so your settings follow you. The setup script copies `.setup/config.toml.example` into `~/.codex/config.toml` if it does not exist. API keys are stored in `~/code/devcontainer.env`, and the setup script writes the relevant endpoint/model into `~/.codex/config.toml`. Edit `~/.codex/config.toml` to switch profiles or change settings.
 
 ## Troubleshooting
-- Dev Container fails with an env-file error: make sure `~/code/.env` exists on your host (Linux/WSL).
+- Dev Container fails with an env-file error: make sure `~/code/devcontainer.env` exists on your host (Linux/WSL).
 - If you see an error that Docker is not running: open Docker Desktop (Windows) or start Docker (Linux) and try again.
 - If VS Code does not show "Dev Containers" commands: install the Dev Containers extension and restart VS Code.
 - Windows: if `code .` does nothing in Ubuntu (WSL), install the VS Code WSL extension and restart VS Code.
@@ -142,8 +144,9 @@ Codex reads a config file at `~/.codex/config.toml` on your host. This file live
 ├─ .vscode/
 │  └─ settings.json           # VS Code settings
 ├─ .setup/
-│  ├─ .env.example            # Example env vars (copied to ~/code/.env by setup script)
+│  ├─ devcontainer.env.example # Example env vars (copied to ~/code/devcontainer.env by setup script)
+│  ├─ devcontainer.netrc      # Example netrc entry for GitHub
 │  └─ config.toml.example     # Example Codex config (copied to ~/.codex/config.toml by setup script)
-├─ setup.py                   # Writes ~/code/.env and ~/.codex/config.toml (prompts for keys/profile)
+├─ setup.py                   # Writes ~/code/devcontainer.env, ~/code/devcontainer.netrc, and ~/.codex/config.toml
 └─ src/                       # Your production repo
 ```

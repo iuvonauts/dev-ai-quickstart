@@ -1,7 +1,7 @@
 # Outstanding
 
 ## Short Term
-- Confirm expected env vars for `${HOME}/code/.env`.
+- Confirm expected env vars for `${HOME}/code/devcontainer.env`.
 - Add a minimal sample app or test scaffold in `src/`.
 
 ## Nice To Have

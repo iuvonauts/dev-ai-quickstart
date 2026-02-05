@@ -4,7 +4,7 @@ profile = "azure"
 approval_policy = "never"
 
 # Notes:
-# - The Dev Container loads `~/code/.env` on your host as environment variables.
+# - The Dev Container loads `~/code/devcontainer.env` on your host as environment variables.
 # - This file references API keys via `env_key` (e.g. `AZURE_API_KEY`, `CUSTOM_API_KEY`).
 # - Endpoints and model names are stored directly in this file (and are set by `./setup.py`).
 
