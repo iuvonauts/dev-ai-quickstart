@@ -32,9 +32,11 @@ model_provider = "azure"
 # Azure OpenAI provider settings
 name = "Azure OpenAI"
 # This value is updated by the setup script.
-base_url = "https://<your-azure-openai-resource>.openai.azure.com/openai/v1"
+base_url = "https://<your-azure-openai-resource>.openai.azure.com/openai"
 env_key = "AZURE_API_KEY"
 wire_api = "responses"
+[model_providers.azure.query_params]
+"api-version" = "2025-04-01-preview"
 
 [profiles.chatgpt]
 # OpenAI ChatGPT profile
