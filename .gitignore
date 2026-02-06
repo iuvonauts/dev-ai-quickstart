@@ -11,6 +11,8 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+devcontainer.env
+devcontainer.netrc
 
 # Language/tool caches
 __pycache__/
