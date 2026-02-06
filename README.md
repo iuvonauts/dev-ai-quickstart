@@ -2,7 +2,7 @@
 
 This repository creates a ready-to-use AI coding environment in VS Code using a Dev Container. A Dev Container is a pre-built, isolated development environment that keeps your tools and dependencies separate from your computer.
 
-This repo creates a starting development environment for your project. Your actual project code should go in `src/` and can be its own git repository.
+This repo creates a starting development environment for your project. Your actual project code should go in `src/` and can be its own git repository. Running setup will create a host config so your configuration is reused across all Dev Containers in your environment without additional configuration.
 
 ## What's In This Quickstart
 - A pre-configured Docker-based Dev Container based on `mcr.microsoft.com/devcontainers/universal:linux`.
@@ -40,6 +40,7 @@ In the steps below:
    - Dev Containers: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers
 3. Install Docker with defaults:
    - Windows/macOS: Docker Desktop https://www.docker.com/products/docker-desktop/
+      * You can safely ignore any prompts from Docker Desktop to create an account or log in.
    - Linux: Docker Engine https://docs.docker.com/engine/install/
 4. Install Git:
    - Linux/WSL:
@@ -95,16 +96,12 @@ You will also be prompted for an optional GitHub Personal Access Token to store 
    ```bash
    code .
    ```
-2. When VS Code prompts, click **Reopen in Container**.
+   Click through any "Trust this repo/folder" prompts.
+3. When VS Code prompts, click **Reopen in Container**.
    If you do not see the prompt:
    1. Open the Command Palette (Ctrl+Shift+P).
    2. Run: `Dev Containers: Reopen in Container`.
-
-3. Wait for the container to build (first time can take several minutes).
-
-This repo mounts host config into the container so your configuration is reused across machines:
-- `~/code/devcontainer.netrc` -> `/home/codespace/.netrc`
-- `~/.codex` -> `/home/codespace/.codex`
+4. Wait for the container to build (first time can take several minutes).
 
 ## Agent Skills & Tools
 Most coding agents support Agent Skills (https://agentskills.io/). Agent Skills ensure agents apply consistent instructions for specific tasks. Skills are stored in `.codex/skills/<skill-name>/`. The skills `$skill-creator` and `$skill-installer` are included by default with the Codex extension. To add additional skills, you can browse OpenAI's curated skills catalog at https://github.com/openai/skills, find other skills created by the community, or create your own skills for specific tasks.
