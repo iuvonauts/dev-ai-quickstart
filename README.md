@@ -125,8 +125,7 @@ This quickstart also includes two MCP tools in `~/.codex/config.toml` (created f
 │  ├─ sessions/               # Agent chat sessions logs
 │  └─ skills/                 # Agent skills
 ├─ .devcontainer/
-│  ├─ devcontainer.json       # Dev Container definition
-│  └─ worktree-guard.sh       # Optional guard against branch switching
+│  └─ devcontainer.json       # Dev Container definition
 ├─ .vscode/
 │  └─ settings.json           # VS Code settings
 ├─ .setup/

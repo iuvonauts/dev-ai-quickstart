@@ -23,7 +23,4 @@
 - Session logs mounted from `.codex/sessions` in the repo.
 
 ## Setup Script
-- Run `python3 setup.py` from the repo to create `~/code/devcontainer.env`, `~/code/devcontainer.netrc`, and `~/.codex/config.toml` (it refuses to overwrite existing files).
-
-## Worktree Guard
-- `.devcontainer/worktree-guard.sh` can install a guard that blocks `git switch` / `git checkout` in this repo.
+- The script `python3 setup.py` was run by the user from the repo at first start to create `~/code/devcontainer.env`, `~/code/devcontainer.netrc`, and `~/.codex/config.toml`. This directory can be safely ignored.
