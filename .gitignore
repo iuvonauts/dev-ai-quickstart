@@ -1,4 +1,9 @@
-.codex/
+# codex chat history - remove if you want to commit these
+.codex/sessions/
+
+# setup artifacts
+.setup/
+setup.py
 
 # OS junk
 .DS_Store
@@ -7,10 +12,9 @@ Thumbs.db
 # Logs
 *.log
 
-# Local environment (keep examples committed)
+# Local environment
 .env
 .env.*
-!.env.example
 
 # Language/tool caches
 __pycache__/
