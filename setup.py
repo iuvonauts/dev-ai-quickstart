@@ -47,7 +47,7 @@ def toml_set_existing(lines: list[str], section: str | None, key: str, value: st
     return False
 
 
-def write_devcontainer_env(path: Path, template_path: Path, *, azure_key: str, custom_key: str):
+def write_devcontainer_env(path: Path, template_path: Path, *, azure_key: str, custom_key: str, gh_token: str):
     lines = template_path.read_text(encoding="utf-8").splitlines()
     out: list[str] = []
     for line in lines:
@@ -55,6 +55,8 @@ def write_devcontainer_env(path: Path, template_path: Path, *, azure_key: str, c
             out.append(f"AZURE_API_KEY={azure_key}")
         elif line.startswith("CUSTOM_API_KEY="):
             out.append(f"CUSTOM_API_KEY={custom_key}")
+        elif line.startswith("GH_TOKEN="):
+            out.append(f"GH_TOKEN={gh_token}")
         else:
             out.append(line)
     path.write_text("\n".join(out) + "\n", encoding="utf-8")
@@ -105,7 +107,7 @@ def main() -> int:
         custom_key = ask("Custom API Key (optional)", None, secret=True) or ""
 
     print("\n--- GitHub Access ---")
-    pat = ask("GitHub PAT (optional)", None, secret=True)
+    gh_token = ask("GitHub PAT (optional)", None, secret=True) or ""
 
     # 1) devcontainer.env
     write_devcontainer_env(
@@ -113,13 +115,14 @@ def main() -> int:
         repo_root / ".setup/devcontainer.env.example",
         azure_key=azure_key,
         custom_key=custom_key,
+        gh_token=gh_token,
     )
     print(f"Created {env_target}")
 
     # 2) devcontainer.netrc
     netrc_lines = ["machine github.com", "  login x-access-token"]
-    if pat:
-        netrc_lines.append(f"  password {pat}")
+    if gh_token:
+        netrc_lines.append(f"  password {gh_token}")
     netrc_target.write_text("\n".join(netrc_lines) + "\n", encoding="utf-8")
     try:
         netrc_target.chmod(0o600)

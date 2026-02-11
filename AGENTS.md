@@ -1,6 +1,6 @@
 # Agent Working Notes
 
-_Last updated: 2026-02-05_
+_Last updated: 2026-02-11_
 
 This file is a lightweight index of the repo context, current priorities, and working agreements. Keep it short, update the date when material changes, and move details into the linked pages.
 
@@ -14,7 +14,9 @@ This file is a lightweight index of the repo context, current priorities, and wo
 ## Environment Notes
 - For API or library questions, consult up-to-date documentation tools before answering.
 - For security analysis, favor static analysis tools when present and summarize actionable findings.
-- GitHub credentials are mounted to `/home/codespace/.netrc`.
+- Inside the devcontainer, expect both `GH_TOKEN` and `/home/codespace/.netrc` to be available for GitHub auth.
+- Use `GH_TOKEN` for GitHub API/CLI auth flows (for example `gh auth token`-style env usage or direct API calls).
+- Use `/home/codespace/.netrc` for typical git-over-HTTPS auth (clone/fetch/push) inside the devcontainer.
 - Docker is available inside the devcontainer for running code/test environments.
 - `HOST_WORKSPACE` is set to the host path of the repo for docker-outside-docker bind mounts.
 - The production codebase should live in `src/` as its own repo; this repo only provisions the development environment.
