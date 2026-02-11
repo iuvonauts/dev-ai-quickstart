@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import sys
 from getpass import getpass
 from pathlib import Path
 
@@ -69,10 +68,9 @@ def main() -> int:
     codex_dir = home / ".codex"
 
     env_target = code_dir / "devcontainer.env"
-    netrc_target = code_dir / "devcontainer.netrc"
     cfg_target = codex_dir / "config.toml"
 
-    existing = [p for p in (env_target, netrc_target, cfg_target) if p.exists()]
+    existing = [p for p in (env_target, cfg_target) if p.exists()]
     if existing:
         print("❌ Refusing to overwrite existing files:")
         for p in existing:
@@ -119,18 +117,7 @@ def main() -> int:
     )
     print(f"Created {env_target}")
 
-    # 2) devcontainer.netrc
-    netrc_lines = ["machine github.com", "  login x-access-token"]
-    if gh_token:
-        netrc_lines.append(f"  password {gh_token}")
-    netrc_target.write_text("\n".join(netrc_lines) + "\n", encoding="utf-8")
-    try:
-        netrc_target.chmod(0o600)
-    except OSError:
-        pass
-    print(f"Created {netrc_target}")
-
-    # 3) ~/.codex/config.toml
+    # 2) ~/.codex/config.toml
     cfg_lines = (repo_root / ".setup/config.toml.example").read_text(encoding="utf-8").splitlines()
     ok = True
     ok &= toml_set_existing(cfg_lines, None, "profile", profile)
