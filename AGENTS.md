@@ -14,7 +14,7 @@ This file is a lightweight index of the repo context, current priorities, and wo
 ## Environment Notes
 - For API or library questions, consult up-to-date documentation tools before answering.
 - For security analysis, favor static analysis tools when present and summarize actionable findings.
-- Inside the devcontainer, expect both `GH_TOKEN` and `/home/codespace/.netrc` to be available for GitHub auth.
+- Inside the devcontainer, use `GH_TOKEN` and `/home/codespace/.netrc` for GitHub auth. `/home/codespace/.netrc` is generated on container start from `GH_TOKEN`.
 - Use `GH_TOKEN` for GitHub API/CLI auth flows (for example `gh auth token`-style env usage or direct API calls).
 - Use `/home/codespace/.netrc` for typical git-over-HTTPS auth (clone/fetch/push) inside the devcontainer.
 - Docker is available inside the devcontainer for running code/test environments.

@@ -14,7 +14,8 @@
 - In-container auth surface:
 - `GH_TOKEN` is for GitHub API/CLI interactions that read a token from env.
 - `/home/codespace/.netrc` is for git-over-HTTPS operations (clone/fetch/push).
-- These are provisioned by devcontainer setup and host mounts.
+- `.devcontainer/sync-netrc.sh` runs on container start to generate `/home/codespace/.netrc` from `GH_TOKEN`.
+- If `GH_TOKEN` is empty, `/home/codespace/.netrc` is removed.
 
 ## Docker-Outside-Docker
 - `HOST_WORKSPACE` points to the host path of the repo so Docker bind mounts work when running `docker compose` inside the devcontainer.

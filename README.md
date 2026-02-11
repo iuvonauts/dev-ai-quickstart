@@ -79,7 +79,7 @@ From the repo folder in Linux/WSL/macOS, run:
 ```bash
 python3 setup.py
 ```
-This script creates the default Codex extension configuration files (`~/code/devcontainer.env`, `~/code/devcontainer.netrc`, and `~/.codex/config.toml`) and prompts you for your preferred profile (`Azure/ChatGPT/Custom`) and any required values. It writes `~/.codex/config.toml` from `.setup/config.toml.example` and fills in the profile/endpoint/model values.
+This script creates the default Codex extension configuration files (`~/code/devcontainer.env` and `~/.codex/config.toml`) and prompts you for your preferred profile (`Azure/ChatGPT/Custom`) and any required values. It writes `~/.codex/config.toml` from `.setup/config.toml.example` and fills in the profile/endpoint/model values.
 It will not overwrite existing files; you will need to delete them if you want to re-run setup.
 
 Included profiles:
@@ -87,7 +87,7 @@ Included profiles:
 - **ChatGPT**: OpenAI sign-in; you will be prompted to log in when you first use Codex in VS Code.
 - **Custom**: Any OpenAI-compatible endpoint (local or hosted). The setup script will prompt you for the endpoint and model to write into `~/.codex/config.toml`, and (optionally) `CUSTOM_API_KEY`. Example local endpoint: `http://host.docker.internal:8080/v1`.
 
-You will also be prompted for an optional GitHub Personal Access Token, which the setup script stores as `GH_TOKEN` in `~/code/devcontainer.env` and also uses to generate `~/code/devcontainer.netrc` for GitHub access inside the Dev Container (for example: cloning private repos, pushing code, or using GitHub APIs). This can be created at https://github.com/settings/tokens.
+You will also be prompted for an optional GitHub Personal Access Token, which the setup script stores as `GH_TOKEN` in `~/code/devcontainer.env`. On container start, `.devcontainer/sync-netrc.sh` generates `/home/codespace/.netrc` from `GH_TOKEN` (and removes it if `GH_TOKEN` is empty) for GitHub access inside the Dev Container (for example: cloning private repos, pushing code, or using GitHub APIs). This can be created at https://github.com/settings/tokens.
 
 **Treat all keys like passwords! Do not commit them or share them in chat!**
 
@@ -125,13 +125,13 @@ This quickstart also includes two MCP tools in `~/.codex/config.toml` (created f
 │  ├─ sessions/               # Agent chat sessions logs
 │  └─ skills/                 # Agent skills
 ├─ .devcontainer/
-│  └─ devcontainer.json       # Dev Container definition
+│  ├─ devcontainer.json       # Dev Container definition
+│  └─ sync-netrc.sh           # Generates /home/codespace/.netrc from GH_TOKEN on start
 ├─ .vscode/
 │  └─ settings.json           # VS Code settings
 ├─ .setup/
 │  ├─ devcontainer.env.example # Example env vars (copied to ~/code/devcontainer.env by setup script)
-│  ├─ devcontainer.netrc      # Example netrc entry for GitHub
 │  └─ config.toml.example     # Example Codex config (copied to ~/.codex/config.toml by setup script)
-├─ setup.py                   # Writes ~/code/devcontainer.env, ~/code/devcontainer.netrc, and ~/.codex/config.toml
+├─ setup.py                   # Writes ~/code/devcontainer.env and ~/.codex/config.toml
 └─ src/                       # Your production repo
 ```
