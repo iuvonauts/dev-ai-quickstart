@@ -11,9 +11,10 @@
 - VS Code with the Dev Containers extension, or GitHub Codespaces.
 
 ## Environment Files
-- The devcontainer loads `${HOME}/code/devcontainer.env` via `--env-file`.
-- GitHub credentials are mounted from `${HOME}/code/devcontainer.netrc` to `/home/codespace/.netrc`.
-- Ensure the files exist or update the devcontainer configuration.
+- In-container auth surface:
+- `GH_TOKEN` is for GitHub API/CLI interactions that read a token from env.
+- `/home/codespace/.netrc` is for git-over-HTTPS operations (clone/fetch/push).
+- These are provisioned by devcontainer setup and host mounts.
 
 ## Docker-Outside-Docker
 - `HOST_WORKSPACE` points to the host path of the repo so Docker bind mounts work when running `docker compose` inside the devcontainer.
@@ -23,7 +24,4 @@
 - Session logs mounted from `.codex/sessions` in the repo.
 
 ## Setup Script
-- Run `python3 setup.py` from the repo to create `~/code/devcontainer.env`, `~/code/devcontainer.netrc`, and `~/.codex/config.toml` (it refuses to overwrite existing files).
-
-## Worktree Guard
-- `.devcontainer/worktree-guard.sh` can install a guard that blocks `git switch` / `git checkout` in this repo.
+- `python3 setup.py` prepares host-side files consumed by the devcontainer; agents should rely on in-container paths/variables.

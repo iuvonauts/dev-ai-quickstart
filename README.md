@@ -87,7 +87,7 @@ Included profiles:
 - **ChatGPT**: OpenAI sign-in; you will be prompted to log in when you first use Codex in VS Code.
 - **Custom**: Any OpenAI-compatible endpoint (local or hosted). The setup script will prompt you for the endpoint and model to write into `~/.codex/config.toml`, and (optionally) `CUSTOM_API_KEY`. Example local endpoint: `http://host.docker.internal:8080/v1`.
 
-You will also be prompted for an optional GitHub Personal Access Token to store in `~/code/devcontainer.netrc` for GitHub access inside the Dev Container (for example: cloning private repos, pushing code, or using GitHub APIs). This can be created at https://github.com/settings/tokens.
+You will also be prompted for an optional GitHub Personal Access Token, which the setup script stores as `GH_TOKEN` in `~/code/devcontainer.env` and also uses to generate `~/code/devcontainer.netrc` for GitHub access inside the Dev Container (for example: cloning private repos, pushing code, or using GitHub APIs). This can be created at https://github.com/settings/tokens.
 
 **Treat all keys like passwords! Do not commit them or share them in chat!**
 
@@ -125,8 +125,7 @@ This quickstart also includes two MCP tools in `~/.codex/config.toml` (created f
 │  ├─ sessions/               # Agent chat sessions logs
 │  └─ skills/                 # Agent skills
 ├─ .devcontainer/
-│  ├─ devcontainer.json       # Dev Container definition
-│  └─ worktree-guard.sh       # Optional guard against branch switching
+│  └─ devcontainer.json       # Dev Container definition
 ├─ .vscode/
 │  └─ settings.json           # VS Code settings
 ├─ .setup/
