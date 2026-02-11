@@ -19,6 +19,8 @@ This file is a lightweight index of the repo context, current priorities, and wo
 - Use `/home/codespace/.netrc` for typical git-over-HTTPS auth (clone/fetch/push) inside the devcontainer.
 - Docker is available inside the devcontainer for running code/test environments.
 - `HOST_WORKSPACE` is set to the host path of the repo for docker-outside-docker bind mounts.
+- Worktree defaults are enabled on this branch: keep a layout like `<repo>/main` plus sibling branch worktrees.
+- A shell guard blocks `git switch` and `git checkout` in worktree contexts by default; set `GIT_WORKTREE_UNLOCK=1` to override when needed.
 - The production codebase should live in `src/` as its own repo; this repo only provisions the development environment.
 - Codex session logs are written under `.codex/sessions/`. This template keeps the folder empty; commit sessions in your derived repo only if user wants to preserve conversations.
 - Project-local agent skills live under `.codex/skills/`.

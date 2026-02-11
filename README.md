@@ -9,6 +9,7 @@ This repo creates a starting development environment for your project. Your actu
 - Docker access inside the Dev Container so the agent can spin up new environments to test code.
 - The OpenAI Codex coding extension (`openai.chatgpt`), configured via profiles to use Azure, ChatGPT sign-in, or a custom OpenAI-compatible endpoint.
 - A setup script (`setup.py`) to configure the initial environment.
+- This branch also enables a worktree guard that blocks `git switch`/`git checkout` inside worktree contexts unless explicitly overridden.
 
 ## Before You Start (Important)
 This quickstart requires a folder named `code` in your home directory (Linux/WSL/macOS) where your repos will be stored.
@@ -125,7 +126,8 @@ This quickstart also includes two MCP tools in `~/.codex/config.toml` (created f
 │  ├─ sessions/               # Agent chat sessions logs
 │  └─ skills/                 # Agent skills
 ├─ .devcontainer/
-│  └─ devcontainer.json       # Dev Container definition
+│  ├─ devcontainer.json       # Dev Container definition
+│  └─ worktree-guard.sh       # Installs shell guard for worktree-safe git usage
 ├─ .vscode/
 │  └─ settings.json           # VS Code settings
 ├─ .setup/

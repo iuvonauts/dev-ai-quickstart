@@ -25,3 +25,8 @@
 
 ## Setup Script
 - `python3 setup.py` prepares host-side files consumed by the devcontainer; agents should rely on in-container paths/variables.
+
+## Worktree Guard
+- On this branch, `.devcontainer/devcontainer.json` runs `.devcontainer/worktree-guard.sh` via `postCreateCommand`.
+- The guard blocks `git switch` / `git checkout` in worktree contexts to prevent accidental branch moves.
+- Override intentionally with `GIT_WORKTREE_UNLOCK=1` for one-off operations.
