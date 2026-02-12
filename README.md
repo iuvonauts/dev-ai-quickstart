@@ -59,11 +59,11 @@ In Linux/WSL/macOS:
 REPO="my-repo"
 ```
 
-2) Make the parent folder and clone the template into `main`:
+2) Make the parent folder and clone the template:
 ```bash
 mkdir -p ~/code/"$REPO" \
    && cd ~/code/"$REPO" \
-   && git clone https://github.com/iuvonauts/dev-ai-quickstart.git main
+   && git clone https://github.com/iuvonauts/dev-ai-quickstart.git .
 ```
 
 3) Detach from the template and start fresh git history:
